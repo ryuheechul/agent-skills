@@ -1,11 +1,11 @@
 ---
-name: document-commands
+name: memento-momentum
 description: Enforces a 'Document-then-Execute' workflow. Use when an agent needs to run shell commands, execute tests, build projects, or perform any task that should favor established task runners (Makefile, npm run) and be logged to .cmds-by-agents/ for auditability.
 ---
 
-# Document Commands
+# Memento Momentum
 
-This skill guides agents to prioritize project-specific, established commands and ensures that non-trivial command executions are documented in a dedicated directory for auditability.
+This skill guides agents to prioritize project-specific, established commands and ensures that non-trivial command executions are documented with their **Intent** in a dedicated directory for auditability.
 
 ## Core Mandates
 
@@ -26,6 +26,7 @@ To ensure auditability and persistence, **AVOID** executing bespoke or complex c
     - **Content**:
       ```bash
       #!/usr/bin/env bash
+      # Intent: [Short description of why you are running this command]
       set -x
       [Full command here]
       ```
@@ -52,6 +53,7 @@ To ensure auditability and persistence, **AVOID** executing bespoke or complex c
     - Create `.cmds-by-agents/test-filtered-20260312-143005.sh`:
       ```bash
       #!/usr/bin/env bash
+      # Intent: Run only auth tests with verbose output for debugging
       set -x
       npm run test -- --filter="auth" --reporter=verbose
       ```

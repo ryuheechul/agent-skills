@@ -7,13 +7,13 @@ To provide specialized procedural knowledge and workflows to agents, enhancing t
 
 ## Available Skills
 
-### 1. Document Commands (`document-commands/`)
+### 1. Memento Momentum (`memento-momentum/`)
 Enforces a **"Document-then-Execute"** workflow for all command-line operations.
 
-- **Purpose**: Prioritize established project commands (e.g., `Makefile`, `npm run`) and log all executions for persistence and auditability.
+- **Purpose**: Prioritize established project commands (e.g., `Makefile`, `npm run`) and log all non-trivial executions with their **Intent** for auditability.
 - **Workflow**:
   1.  **Research**: Check for existing task runners or established scripts.
-  2.  **Creation**: Use an agent's file-writing capability to create a script in `.cmds-by-agents/` with `set -x`.
+  2.  **Creation**: Use an agent's file-writing capability to create a script in `.cmds-by-agents/` with an **Intent** comment and `set -x`.
   3.  **Permissions**: Ensure the script is executable (`chmod +x`).
   4.  **Execution**: Run the script directly.
 
@@ -39,7 +39,7 @@ Link the desired skills to your agent's configuration directory. For example, in
 
 ```bash
 mkdir -p ~/.agents/skills # or whatever directory that your harness loads skills from
-ln -s "$(pwd)/document-commands" ~/.agents/skills/document-commands
+ln -s "$(pwd)/memento-momentum" ~/.agents/skills/memento-momentum
 ```
 
 ### 3. Reload Agent Context
@@ -50,13 +50,13 @@ After installation, you must refresh your agent's session or reload its configur
 ## Repository Structure
 ```
 .
-├── .cmds-by-agents/   # (Ignored) Local command logs
-├── .gitignore         # Standard ignore patterns
-├── SKILLS.md          # This index and documentation
+├── .cmds-by-agents/    # (Ignored) Local command logs
+├── .gitignore          # Standard ignore patterns
+├── SKILLS.md           # This index and documentation
 ├── README.md -> SKILLS.md # Symlink to this file
-└── document-commands/ # Skill source
-    ├── SKILL.md       # Skill manifest and instructions
-    ├── assets/        # Reusable assets
-    ├── references/    # Domain-specific references
-    └── scripts/       # Helper scripts
+└── memento-momentum/   # Skill source
+    ├── SKILL.md        # Skill manifest and instructions
+    ├── assets/         # Reusable assets
+    ├── references/     # Domain-specific references
+    └── scripts/        # Helper scripts
 ```
