@@ -19,13 +19,22 @@ Enforces a **"Document-then-Execute"** workflow for all command-line operations.
 
 ## Installation
 
-### 1. Clone the Repository
+### Method 1: Using npx (Recommended)
+You can install skills directly using the `npx skills` command:
+
+```bash
+npx skills add ryuheechul/agent-skills
+```
+
+### Method 2: Manual Setup (via Symlink)
+
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/ryuheechul/agent-skills.git
 cd agent-skills
 ```
 
-### 2. Symlink to Agent Skills Directory
+#### 2. Symlink to Agent Skills Directory
 Link the desired skills to your agent's configuration directory. For example, in many environments:
 
 ```bash
