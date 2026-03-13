@@ -25,7 +25,7 @@ To ensure auditability and persistence, **AVOID** executing bespoke or complex c
     - **Naming Convention**: `<purpose>-<YYYYMMDD>-<HHMMSS>.sh`.
     - **Content**:
       ```bash
-      #!/bin/bash
+      #!/usr/bin/env bash
       set -x
       [Full command here]
       ```
@@ -51,7 +51,7 @@ To ensure auditability and persistence, **AVOID** executing bespoke or complex c
 3.  **Bespoke Action**: If you need to run tests with specific filters and a custom reporter:
     - Create `.cmds-by-agents/test-filtered-20260312-143005.sh`:
       ```bash
-      #!/bin/bash
+      #!/usr/bin/env bash
       set -x
       npm run test -- --filter="auth" --reporter=verbose
       ```
