@@ -5,61 +5,55 @@ description: Enforces a 'Document-then-Execute' workflow. Use when an agent need
 
 # Document Commands
 
-This skill guides agents to use project-specific, established commands instead of ad-hoc one-liners, and ensures every command execution is documented in a dedicated directory.
+This skill guides agents to prioritize project-specific, established commands and ensures that non-trivial command executions are documented in a dedicated directory for auditability.
 
 ## Core Mandates
 
-### 1. Favor Established Commands
-Before executing any command to build, test, lint, or run the project, you **MUST** first research the repository for established task runners or scripts.
+### 1. Prioritize Established Commands
+Before executing any command to build, test, lint, or run the project, you **SHOULD** first research the repository for established task runners or scripts.
 
-- **Check for**:
-  - `package.json` (npm/yarn/pnpm scripts)
-  - `Makefile` or `makefile`
-  - `tasks.json` (VS Code tasks)
-  - `Justfile` (Just runner)
-  - `Taskfile.yml` (Task runner)
-  - Shell scripts in `scripts/`, `bin/`, or `tools/`
-- **Action**: If an established command exists (e.g., `npm run test` instead of `vitest`), you **MUST** use the established one.
+- **Check for**: `package.json`, `Makefile`, `tasks.json`, `Justfile`, `Taskfile.yml`, or scripts in `scripts/`, `bin/`, or `tools/`.
+- **Action**: If an established command exists (e.g., `npm run test` instead of `vitest`), you **SHOULD** prefer it.
+- **Nuance**: Standard, simple calls to established task runners (e.g., `npm run test`, `make build`) are considered safe and do not strictly require the creation of a documented script unless they are being modified or are part of a larger sequence.
 
-### 2. Document All Command Executions
-To ensure auditability and persistence across agent sessions, do **NOT** execute commands directly. Instead, follow this "Document-then-Execute" workflow.
+### 2. Document Non-Trivial Command Executions
+To ensure auditability and persistence, **AVOID** executing bespoke or complex commands directly. Instead, follow this "Document-then-Execute" workflow for non-trivial tasks.
 
 #### Workflow: Document-then-Execute
-1.  **Preparation**: Ensure the `.cmds-by-agents/` directory exists at the project root (e.g., `mkdir -p .cmds-by-agents`).
-2.  **Creation**: Use `write_file` or an equivalent file-writing tool (e.g., `sed`, `tee`, or any tool that provides a visible diff/output of the file content) to create a shell script in `.cmds-by-agents/`.
-    - **Visibility**: Using a file-writing tool ensures the command content is clearly visible in the tool output/diff for review.
-    - **Naming Convention**: `<purpose>-<YYYYMMDD>-<HHMMSS>.sh` (e.g., `run-tests-20260312-143005.sh`).
+1.  **Preparation**: Ensure the `.cmds-by-agents/` directory exists (e.g., `mkdir -p .cmds-by-agents`).
+2.  **Creation**: Use `write_file` or an equivalent tool to create a shell script in `.cmds-by-agents/`.
+    - **Naming Convention**: `<purpose>-<YYYYMMDD>-<HHMMSS>.sh`.
     - **Content**:
       ```bash
       #!/bin/bash
       set -x
-      # Command: [Full command here]
       [Full command here]
       ```
-3.  **Permissions**: Make the script executable (e.g., `chmod +x .cmds-by-agents/run-tests-20260312-143005.sh`).
-4.  **Execution**: Execute the command by running the generated script directly (e.g., `./.cmds-by-agents/run-tests-20260312-143005.sh`).
-
-### 3. Security & Environment Variables
-- **No Secrets**: NEVER embed sensitive information (API keys, passwords, tokens) directly in the command script.
-- **Sensitive Env Vars**: If a command requires sensitive environment variables, they must be provided at execution time (e.g., `API_KEY=xxx ./.cmds-by-agents/deploy.sh`) rather than being written into the script.
-- **Avoid Leakage**: When sensitive information is being passed or handled, **DO NOT** use `set -x` or any echoing that would reveal secret values in the output.
-- **Non-Sensitive Vars**: Embedding non-sensitive environment variables (e.g., `NODE_ENV=production`) in the script is encouraged for clarity and reproducibility.
+3.  **Permissions**: Make the script executable (`chmod +x`).
+4.  **Execution**: Run the generated script directly (e.g., `./.cmds-by-agents/script.sh`).
 
 #### Exceptions
-- Simple research/management commands like `mkdir`, `ls`, `grep`, or `cd` are allowed to be run directly.
+- Simple research, navigation, and management commands (e.g., `ls`, `cd`, `mkdir`, `grep`, `git status`) are allowed to be run directly.
+- Standard, direct calls to established project scripts (e.g., `npm start`) may be run directly if they don't involve complex flags or environment setup.
+
+### 3. Security & Secrets
+- **No Secrets**: NEVER embed sensitive information (API keys, passwords, tokens) in the command script.
+- **Execution-Time Secrets**: Sensitive environment variables must be provided at execution time, either by assuming they are provided by external tooling or by confirming with the user.
+- **No Leakage**: If secrets are being handled, **DO NOT** use `set -x` in the script to avoid leaking values in the output.
+
+#### Source Control
 - Do **NOT** commit the `.cmds-by-agents/` directory unless explicitly instructed. It should be ignored in `.gitignore`.
 
 ## Example Workflow
 
-If you want to run Vitest tests:
-
 1.  **Research**: You find `"test": "vitest"` in `package.json`.
-2.  **Creation**: Use `write_file` to create `.cmds-by-agents/test-20260312-143005.sh`:
-    ```bash
-    #!/bin/bash
-    set -x
-    # Command: npm run test
-    npm run test
-    ```
-3.  **Permissions**: `run_shell_command("chmod +x .cmds-by-agents/test-20260312-143005.sh")`.
-4.  **Execution**: `run_shell_command("./.cmds-by-agents/test-20260312-143005.sh")`.
+2.  **Simple Action**: You may run `npm run test` directly.
+3.  **Bespoke Action**: If you need to run tests with specific filters and a custom reporter:
+    - Create `.cmds-by-agents/test-filtered-20260312-143005.sh`:
+      ```bash
+      #!/bin/bash
+      set -x
+      npm run test -- --filter="auth" --reporter=verbose
+      ```
+    - `chmod +x .cmds-by-agents/test-filtered-20260312-143005.sh`
+    - `./.cmds-by-agents/test-filtered-20260312-143005.sh`
